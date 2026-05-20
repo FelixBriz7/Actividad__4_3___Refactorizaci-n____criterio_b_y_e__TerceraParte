@@ -38,7 +38,7 @@ public class PersonaDAOimp implements PersonaDAO {
             pStatement.setString(1,persona.getDni());
             pStatement.setString(2,persona.getNombre());
             pStatement.setString(3,persona.getApellido());
-            pStatement.setString(4, persona.getFecha_de_nacimiento().toString());
+            pStatement.setString(4, persona.getFechaDeNacimiento().toString());
 
             pStatement.executeUpdate();
 
@@ -207,7 +207,7 @@ public class PersonaDAOimp implements PersonaDAO {
         List<Persona> personas = listarPersonas();
 
         List<Persona> personaFiltrada= personas.stream().
-                filter(persona -> Helper.calcularEdad(persona.getFecha_de_nacimiento()) == edadBuscada).
+                filter(persona -> Helper.calcularEdad(persona.getFechaDeNacimiento()) == edadBuscada).
                 toList();
 
         if (personaFiltrada.isEmpty())
