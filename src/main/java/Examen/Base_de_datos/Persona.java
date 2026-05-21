@@ -7,18 +7,17 @@ public class Persona {
     private final String dni ;
     private String nombre;
     private String apellido;
-    private final LocalDate fecha_de_nacimiento;
+    private final LocalDate fechaDeNacimiento;
 
     //===============Constructor=================
 
-    public Persona(String dni, String nombre, String apellido, LocalDate fecha_de_nacimiento) throws PersonaException {
+    public Persona(String dni, String nombre, String apellido, LocalDate fechaDeNacimiento) throws PersonaException {
 
         //Si el dni es igual a null o que tenga espacio al principio y al final por ejmplo " 5245235x ", este
         // los elimina dejandolo como "5245235x" o si
         // esta vacio saltará la excepción
 
-        if (dni == null || dni.trim().isEmpty())
-            throw new PersonaException("EL DNI ES NULO");
+        validarDNI(dni);
 
         /*
         * Con el nombre de la persona y el aplleido hacemos lo mismo que la condición del dni.
@@ -26,11 +25,9 @@ public class Persona {
         * y que a la hora de introducirla a la base de datos no nos de error
         * */
 
-        if (nombre == null || nombre.trim().isEmpty())
-            throw new PersonaException("EL NOMBRE ES NULO");
+        validarNombreDelUsuario(nombre);
 
-        if (apellido == null || apellido.trim().isEmpty())
-            throw new PersonaException("EL APELLIDO ES NULO");
+        validarApellidoDelUsuario(apellido);
 
         /*
          *  Aqui si la fecha es nula o es futura, este dará error
@@ -38,14 +35,37 @@ public class Persona {
          * lo cual dará error
          */
 
-        if (fecha_de_nacimiento == null || fecha_de_nacimiento.isAfter(LocalDate.now()))
-            throw new PersonaException("LA FECHA QUE AS INTRODUCIDA ES NULA");
+        validarFechaDeNacimiento(fechaDeNacimiento);
 
 
         this.dni = dni;
         this.nombre = nombre;
         this.apellido = apellido;
-        this.fecha_de_nacimiento = fecha_de_nacimiento;
+        this.fechaDeNacimiento = fechaDeNacimiento;
+    }
+
+
+
+    //====================Metodos extraidos de validacion================
+
+    private static void validarDNI(String dni) {
+        if (dni == null || dni.trim().isEmpty())
+            throw new PersonaException("EL DNI ES NULO");
+    }
+
+    private static void validarNombreDelUsuario(String nombre) {
+        if (nombre == null || nombre.trim().isEmpty())
+            throw new PersonaException("EL NOMBRE ES NULO");
+    }
+
+    private static void validarApellidoDelUsuario(String apellido) {
+        if (apellido == null || apellido.trim().isEmpty())
+            throw new PersonaException("EL APELLIDO ES NULO");
+    }
+
+    private static void validarFechaDeNacimiento(LocalDate fechaDeNacimiento) {
+        if (fechaDeNacimiento == null || fechaDeNacimiento.isAfter(LocalDate.now()))
+            throw new PersonaException("LA FECHA QUE AS INTRODUCIDA ES NULA");
     }
 
 
@@ -72,8 +92,8 @@ public class Persona {
         this.apellido = apellido;
     }
 
-    public LocalDate getFecha_de_nacimiento() {
-        return fecha_de_nacimiento;
+    public LocalDate getFechaDeNacimiento() {
+        return fechaDeNacimiento;
     }
 
     //====================HasCodeEquals==============
@@ -102,9 +122,9 @@ public class Persona {
                 append("Nombre: ").append(nombre).append('\n').
                 append("Apellidos: ").append(apellido).append('\n').
                 append("Fecha de nacimiento: ").append(String.format("%d/%d/%d",
-                        fecha_de_nacimiento.getDayOfMonth(),
-                        fecha_de_nacimiento.getMonthValue(),
-                        fecha_de_nacimiento.getYear())).append('\n').
-                append("Edad: ").append(Helper.calcularEdad(fecha_de_nacimiento)).toString();
+                        fechaDeNacimiento.getDayOfMonth(),
+                        fechaDeNacimiento.getMonthValue(),
+                        fechaDeNacimiento.getYear())).append('\n').
+                append("Edad: ").append(Helper.calcularEdad(fechaDeNacimiento)).toString();
     }
 }

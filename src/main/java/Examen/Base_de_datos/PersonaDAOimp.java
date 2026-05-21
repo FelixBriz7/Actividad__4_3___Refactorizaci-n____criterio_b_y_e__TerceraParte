@@ -10,6 +10,9 @@ import java.util.List;
 
 public class PersonaDAOimp implements PersonaDAO {
 
+
+    //==============================Conexión a la bases de datos=======================
+
     /*
     Creamos un atributo en el que llamamos a la conexión
     de la bases de datos para que podamos utilizar todos los metodos
@@ -23,10 +26,19 @@ public class PersonaDAOimp implements PersonaDAO {
         conexionBD = ConexionSingleton.getInstance();
     }
 
+    //==============================Consultas SQL=========================
+
+    public static final String SQL_INSERTAR = "INSERT INTO PERSONAS VALUES (?, ?, ?, ?)";
+    public static final String SQL_ELIMINAR = "DELETE FROM PERSONAS WHERE DNI = ?";
+    public static final String SQL_ACTUALIZAR = "UPDATE PERSONAS SET NOMBRE = ?, APELLIDO = ? WHERE DNI = ?;";
+    public static final String SQL_LISTAR = "SELECT * FROM PERSONAS;";
+
+    //===============================Metodos Funcionales===================
+
     @Override
     public void insertarPersonas(Persona persona) {
 
-        String sql = "INSERT INTO PERSONAS VALUES (?, ?, ?, ?)";
+        String sql = SQL_INSERTAR;
 
         /*
         Se pone PreparedStatement para hacer el programa lo mas seguro que se pueda ya que a sin evitamos las
@@ -38,7 +50,7 @@ public class PersonaDAOimp implements PersonaDAO {
             pStatement.setString(1,persona.getDni());
             pStatement.setString(2,persona.getNombre());
             pStatement.setString(3,persona.getApellido());
-            pStatement.setString(4, persona.getFecha_de_nacimiento().toString());
+            pStatement.setString(4, persona.getFechaDeNacimiento().toString());
 
             pStatement.executeUpdate();
 
@@ -56,12 +68,12 @@ public class PersonaDAOimp implements PersonaDAO {
         y eliminarla de la base de datos
          */
 
-        String sql = "DELETE FROM PERSONAS WHERE DNI = ?";
+        String sql = SQL_ELIMINAR;
 
-        try (PreparedStatement pStaement = conexionBD.prepareStatement(sql)) {
+        try (PreparedStatement pStatement = conexionBD.prepareStatement(sql)) {
 
-            pStaement.setString(1,dni);
-            pStaement.executeUpdate();
+            pStatement.setString(1,dni);
+            pStatement.executeUpdate();
 
         } catch (SQLException e) {
             System.out.println("Error al eliminar a la persona o no Existe");
@@ -78,7 +90,7 @@ public class PersonaDAOimp implements PersonaDAO {
         Si el orden no conicide con la base de datos o con la consulta, este deja de funcionar y saltará la excepción
          */
 
-        String sql = "UPDATE PERSONAS SET NOMBRE = ?, APELLIDO = ? WHERE DNI = ?;";
+        String sql = SQL_ACTUALIZAR;
 
         try (PreparedStatement pStatement = conexionBD.prepareStatement(sql)) {
 
@@ -106,7 +118,7 @@ public class PersonaDAOimp implements PersonaDAO {
         la información aplicada y necesaria
          */
 
-        String sql = "SELECT * FROM PERSONAS;";
+        String sql = SQL_LISTAR;
 
         List<Persona> personas = new ArrayList<>();
 
@@ -114,11 +126,7 @@ public class PersonaDAOimp implements PersonaDAO {
             ResultSet rs = pStatement.executeQuery();
 
             while (rs.next()) {
-                personas.add(new Persona(
-                        rs.getString(1),
-                        rs.getString(2),
-                        rs.getString(3),
-                        LocalDate.parse(rs.getString(4))));
+                personas.add(mapearPersona(rs));
             }
 
         } catch (SQLException e) {
@@ -126,6 +134,14 @@ public class PersonaDAOimp implements PersonaDAO {
         }
         return personas;
 
+    }
+
+    private static Persona mapearPersona(ResultSet rs) throws SQLException {
+        return new Persona(
+                rs.getString(1),
+                rs.getString(2),
+                rs.getString(3),
+                LocalDate.parse(rs.getString(4)));
     }
 
     @Override
@@ -144,7 +160,8 @@ public class PersonaDAOimp implements PersonaDAO {
 
         try (PreparedStatement pStatement = conexionBD.prepareStatement(sql)) {
 
-            pStatement.setString(1, dni.trim().toLowerCase());
+            String dniNormalizado = dni.trim().toLowerCase();
+            pStatement.setString(1, dniNormalizado);
             ResultSet rs = pStatement.executeQuery();
             /*
             Aqui es importante decir que lo metemos en un while, para que busque la persona, una vez encontrada
@@ -157,7 +174,7 @@ public class PersonaDAOimp implements PersonaDAO {
              */
 
             while (rs.next()) {
-                return new Persona(rs.getString(1), rs.getString(2), rs.getString(3), LocalDate.parse(rs.getString(4)));
+                return mapearPersona(rs);
             }
 
         } catch (SQLException e) {
@@ -180,11 +197,7 @@ public class PersonaDAOimp implements PersonaDAO {
             ResultSet rs = pStatement.executeQuery();
 
             while (rs.next()) {
-                personas.add(new Persona(
-                        rs.getString(1),
-                        rs.getString(2),
-                        rs.getString(3),
-                        LocalDate.parse(rs.getString(4))));
+                personas.add(mapearPersona(rs));
             }
 
         } catch (SQLException e) {
@@ -207,7 +220,7 @@ public class PersonaDAOimp implements PersonaDAO {
         List<Persona> personas = listarPersonas();
 
         List<Persona> personaFiltrada= personas.stream().
-                filter(persona -> Helper.calcularEdad(persona.getFecha_de_nacimiento()) == edadBuscada).
+                filter(persona -> Helper.calcularEdad(persona.getFechaDeNacimiento()) == edadBuscada).
                 toList();
 
         if (personaFiltrada.isEmpty())
